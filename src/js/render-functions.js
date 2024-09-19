@@ -6,7 +6,7 @@ export const renderImages = array => array.map(({
     views,
     comments,
     downloads,
-}) => `<li>
+}) => `<li class="gallery-item">
 <a href="${largeImageURL}">
 <img src="${webformatURL}" class="img" alt="${tags}" />
 </a>
