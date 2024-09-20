@@ -60,19 +60,28 @@ const handleImages = (event) => {
             console.log(error);
         })
         .finally(() => {loader()});
-    // userForm.reset();
+    userForm.reset();
     };
 
 const loadImages = (event) => {
     if (!userQuery) return warn();
-        loader();
+         loader();
         fetchImages(userQuery, currentPage)
-        .then((json) => {
-            if (!json.totalHits.length)  return finishHits();
+            .then((json) => {
             gallery.insertAdjacentHTML('beforeend', renderImages(json.hits).join(''));
-            currentPage++;
-            loadBtn.style.display = json.totalHits > gallery.children.length ? "block" : "none";
-                lightbox.refresh();
+            currentPage++
+            lightbox.refresh();
+              window.scrollBy({
+             top: 200 * 2,
+             behavior: "smooth",
+        });
+            if (gallery.children.length >= json.totalHits) {
+               loadBtn.style.display = "none";
+               return finishHits();
+             } else {
+                loadBtn.style.display = "block";
+                }
+            
         })
         .catch((error) => {
             console.log(error);
