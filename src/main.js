@@ -40,54 +40,58 @@ const lightbox = new SimpleLightbox('.gallery a', {
 let userQuery = '';
 let currentPage = 1;
 
-const handleImages = (event) => {
+const handleImages = async (event) => {
     event.preventDefault();
     userQuery = event.currentTarget.elements.query.value.toLowerCase().trim();
     if (!userQuery) return warn();
     gallery.innerHTML = "";
     loadBtn.style.display = "none";
     currentPage = 1;
-        loader();
-    fetchImages(userQuery, currentPage)
-        .then((json) => {
-            if (!json.hits.length) return mistake();
-            gallery.insertAdjacentHTML('beforeend', renderImages(json.hits).join(''));
-            lightbox.refresh();
-            currentPage++;
-            loadBtn.style.display = json.totalHits > json.hits.length ? "block" : "none";
-        })
-        .catch((error) => {
-            console.log(error);
-        })
-        .finally(() => {loader()});
-    userForm.reset();
-    };
-
-const loadImages = (event) => {
-    if (!userQuery) return warn();
-         loader();
-        fetchImages(userQuery, currentPage)
-            .then((json) => {
-            gallery.insertAdjacentHTML('beforeend', renderImages(json.hits).join(''));
-            currentPage++
-            lightbox.refresh();
-              window.scrollBy({
-             top: 200 * 2,
-             behavior: "smooth",
-        });
-            if (gallery.children.length >= json.totalHits) {
-               loadBtn.style.display = "none";
-               return finishHits();
-             } else {
-                loadBtn.style.display = "block";
-                }
-            
-        })
-        .catch((error) => {
-            console.log(error);
-        })
-        .finally(() => {loader()});
+    loader();
+    try {
+        const json = await fetchImages(userQuery, currentPage);
+        if (!json.hits.length) return mistake();
+        gallery.insertAdjacentHTML('beforeend', renderImages(json.hits).join(''));
+        lightbox.refresh();
+        currentPage++;
+        loadBtn.style.display = json.totalHits > json.hits.length ? "block" : "none";
     }
+    catch (error) {
+        console.log(error);
+    }
+    finally {
+        loader();
+        userForm.reset();
+    };
+};
+
+const loadImages = async (event) => {
+    if (!userQuery) return warn();
+    loader();
+    try {
+        const json = await fetchImages(userQuery, currentPage);
+        gallery.insertAdjacentHTML('beforeend', renderImages(json.hits).join(''));
+        currentPage++;
+        lightbox.refresh();
+        window.scrollBy({
+            top: 200 * 2,
+            behavior: "smooth",
+        });
+        if (gallery.children.length >= json.totalHits) {
+            loadBtn.style.display = "none";
+            return finishHits();
+        } else {
+            loadBtn.style.display = "block";
+        }
+            
+    }
+    catch (error) {
+        console.log(error);
+    }
+    finally {
+        loader();
+    };
+};
 
 userForm.addEventListener('submit', handleImages);
 loadBtn.addEventListener('click', loadImages);
